@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>B.log funcional · Joaquín Marchione</title>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0KZPVGMQQY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-0KZPVGMQQY');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:      #f7f7fb;
+  --ink:     #0e0d14;
+  --text:    #252330;
+  --muted:   #72708a;
+  --dim:     #aeacbe;
+  --border:  #dcdae8;
+  --surface: #eeecf6;
+  --accent:  #5038c8;
+  --accent2: #ede9fb;
+  --serif:   'Instrument Serif', Georgia, serif;
+  --sans:    'Instrument Sans', sans-serif;
+  --mono:    'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 100; opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 48px; }
+
+/* ── NAV ── */
+nav { padding: 30px 0 0; display: flex; justify-content: space-between; align-items: center; }
+.nav-name { font-family: var(--serif); font-size: 1rem; color: var(--ink); }
+.nav-links { display: flex; gap: 20px; }
+.nav-links a {
+  font-family: var(--mono); font-size: 0.59rem; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.18s;
+}
+.nav-links a:hover { color: var(--accent); }
+
+/* ── HERO ── */
+.hero { padding: 72px 0 60px; }
+.hero-tag { font-family: var(--mono); font-size: 0.59rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin-bottom: 20px; }
+.hero h1 {
+  font-family: var(--serif); font-size: clamp(2rem, 5.5vw, 2.9rem);
+  font-weight: 400; line-height: 1.18; color: var(--ink);
+  letter-spacing: -0.02em; margin-bottom: 22px;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-bio { font-size: 0.92rem; color: var(--muted); max-width: 480px; line-height: 1.8; }
+
+/* ── UTILS ── */
+.divider { height: 1px; background: var(--border); margin: 52px 0; }
+.section-label {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 44px;
+  display: flex; align-items: center; gap: 14px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── CASE ── */
+.case { margin-bottom: 88px; }
+.case-eyebrow { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.case-title { font-family: var(--serif); font-size: clamp(1.55rem, 4vw, 2rem); font-weight: 400; line-height: 1.2; color: var(--ink); letter-spacing: -0.015em; margin-bottom: 6px; }
+.case-sub { font-family: var(--serif); font-style: italic; font-size: 0.98rem; color: var(--muted); margin-bottom: 24px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 40px; }
+.tag { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.07em; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+
+/* ── BLOCKS ── */
+.block { margin-bottom: 32px; }
+.block-label {
+  font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--dim);
+  margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.prose { font-size: 0.9rem; color: var(--muted); line-height: 1.8; }
+.prose strong { color: var(--text); font-weight: 600; }
+.prose + .prose { margin-top: 10px; }
+
+.items { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+.item { display: grid; grid-template-columns: 14px 1fr; gap: 10px; font-size: 0.87rem; color: var(--muted); line-height: 1.55; align-items: baseline; }
+.item-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--dim); margin-top: 8px; flex-shrink: 0; }
+.item strong { color: var(--text); font-weight: 600; }
+
+/* ── KPI TABLE ── */
+.kpi-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.82rem; }
+.kpi-table th {
+  font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--dim); padding: 7px 12px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  text-align: left; font-weight: 500;
+}
+.kpi-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; line-height: 1.5; }
+.kpi-table td:first-child { font-weight: 600; color: var(--accent); font-family: var(--mono); font-size: 0.78rem; white-space: nowrap; }
+.kpi-table tr:last-child td { border-bottom: none; }
+.kpi-table tr:nth-child(even) td { background: var(--surface); }
+
+/* ── CAT TABLE ── */
+.cat-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.82rem; }
+.cat-table th {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--dim); padding: 7px 10px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  text-align: left; font-weight: 500;
+}
+.cat-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; line-height: 1.5; }
+.cat-table td:first-child { color: var(--text); font-weight: 500; font-size: 0.8rem; }
+.cat-table td:nth-child(3) { font-weight: 600; }
+.cat-table tr:last-child td { border-bottom: none; }
+.cat-table tr:nth-child(even) td { background: var(--surface); }
+.cat-table tr.top-row td { background: var(--accent2); }
+.cat-table tr.top-row td:nth-child(3) { color: var(--accent); }
+
+/* ── PIVOT ── */
+.pivot-block {
+  border-left: 2px solid var(--accent); padding: 18px 20px;
+  background: var(--accent2); border-radius: 0 6px 6px 0; margin: 28px 0;
+}
+.pivot-label { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.pivot-title { font-family: var(--serif); font-size: 1rem; color: var(--ink); margin-bottom: 8px; line-height: 1.3; }
+.pivot-text { font-size: 0.88rem; color: var(--muted); line-height: 1.75; }
+.pivot-text strong { color: var(--text); font-weight: 600; }
+
+/* ── ITERATIONS ── */
+.iterations { margin: 36px 0; }
+.iterations-title {
+  font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--dim);
+  padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 0;
+}
+.iter { display: grid; grid-template-columns: 52px 1fr; gap: 0 18px; padding: 16px 0; border-bottom: 1px solid var(--border); align-items: start; }
+.iter-num { font-family: var(--mono); font-size: 0.6rem; color: var(--dim); letter-spacing: 0.08em; padding-top: 2px; white-space: nowrap; }
+.iter-title { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 3px; line-height: 1.35; }
+.iter-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+.iter-desc strong { color: var(--text); font-weight: 600; }
+.iter-decision { margin-top: 6px; font-family: var(--mono); font-size: 0.58rem; color: var(--dim); letter-spacing: 0.05em; }
+.iter-decision::before { content: '✓ '; color: #5a9a6a; }
+.iter.pivot-iter { background: var(--accent2); margin: 0 -12px; padding: 16px 12px; }
+.iter.pivot-iter .iter-num { color: var(--accent); }
+.iter.pivot-iter .iter-title { color: var(--accent); }
+
+/* ── RESULT BOX ── */
+.result-box { background: var(--ink); border-radius: 8px; padding: 26px 28px; margin-top: 36px; }
+.result-label { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: #5a5880; margin-bottom: 12px; }
+.result-title { font-family: var(--serif); font-size: 1.05rem; color: #edeaf8; margin-bottom: 18px; letter-spacing: -0.01em; }
+.result-items { display: flex; flex-direction: column; gap: 8px; }
+.result-item { display: grid; grid-template-columns: 14px 1fr; gap: 10px; font-size: 0.82rem; color: #8a88a0; line-height: 1.5; align-items: baseline; }
+.result-item-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin-top: 8px; }
+
+/* ── AI NOTE ── */
+.ai-note { margin-top: 20px; padding: 15px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
+.ai-note strong { color: var(--text); font-weight: 600; }
+
+/* ── PDF LINK ── */
+.pdf-link {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent); text-decoration: none;
+  border-bottom: 1px solid var(--accent); padding-bottom: 2px;
+  transition: opacity 0.18s;
+}
+.pdf-link:hover { opacity: 0.7; }
+
+/* ── FOOTER ── */
+footer { border-top: 1px solid var(--border); padding: 36px 0 56px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+.footer-name { font-family: var(--serif); font-size: 0.98rem; color: var(--ink); margin-bottom: 4px; }
+.footer-meta { font-family: var(--mono); font-size: 0.57rem; color: var(--dim); line-height: 1.9; }
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { font-family: var(--mono); font-size: 0.59rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.18s; }
+.footer-links a:hover { color: var(--accent); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.reveal.on { opacity: 1; transform: none; }
+
+@media (max-width: 500px) {
+  .iter { grid-template-columns: 40px 1fr; gap: 0 12px; }
+  .iter.pivot-iter { margin: 0 -8px; padding: 16px 8px; }
+  .kpi-table, .cat-table { font-size: 0.75rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="reveal">
+    <span class="nav-name">B.log funcional</span>
+    <div class="nav-links">
+      <a href="https://linkedin.com/in/joakomi" target="_blank">LinkedIn</a>
+      <a href="https://github.com/joakoMI" target="_blank">GitHub</a>
+      <a href="https://behance.net/joaquinmarchio" target="_blank">Behance</a>
+    </div>
+  </nav>
+
+  <section class="hero reveal">
+    <div class="hero-tag">Joaquín Marchione · Analista Funcional · CABA</div>
+    <h1>Lo que se pide<br>y lo que se <em>necesita</em><br>no siempre coinciden.</h1>
+    <p class="hero-bio">
+      Trabajo en la intersección entre negocio y lógica. Entiendo lo que se pide,
+      pero sobre todo trabajo para comprender qué es lo que realmente se necesita —
+      que no siempre es la misma cosa.
+    </p>
+  </section>
+
+  <div class="divider"></div>
+  <div class="section-label reveal">Casos de análisis</div>
+
+  <!-- ══════════════════════════════════════
+       CASO 01 · COTIZADOR ML
+  ══════════════════════════════════════ -->
+  <article class="case">
+
+    <div class="reveal">
+      <div class="case-eyebrow">01 · Rentabilidad en marketplace</div>
+      <h2 class="case-title">La pregunta era simple.<br>El problema, no tanto.</h2>
+      <p class="case-sub">¿Estamos ganando o perdiendo en Mercado Libre?</p>
+      <div class="tags">
+        <span class="tag">Problem structuring</span>
+        <span class="tag">Lógica inversa</span>
+        <span class="tag">Análisis de datos</span>
+        <span class="tag">Herramienta interactiva</span>
+        <span class="tag">Colaboración con IA</span>
+      </div>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Contexto</div>
+      <p class="prose">
+        El ERP maneja un único parámetro de precio: un porcentaje de ganancia sobre el costo.
+        La fórmula es fija. Lo que no era fijo — ni visible — es cuánto de ese precio
+        queda después de que Mercado Libre aplica sus deducciones sobre cada venta:
+      </p>
+      <div class="items">
+        <div class="item"><div class="item-dot"></div><div>Comisión por venta según categoría</div></div>
+        <div class="item"><div class="item-dot"></div><div>Cargo fijo por tramo de precio de publicación</div></div>
+        <div class="item"><div class="item-dot"></div><div>Retenciones impositivas variables por provincia del comprador</div></div>
+        <div class="item"><div class="item-dot"></div><div>Costos de envío — variables según modalidad y destino</div></div>
+      </div>
+      <p class="prose" style="margin-top:14px">
+        Los costos individuales de cada venta son visibles en la liquidación de ML.
+        Lo que no existía era un cálculo integrado que los tradujera en margen real por producto
+        — y mucho menos uno que resolviera el problema al revés:
+        <strong>dado un margen objetivo, ¿qué porcentaje hay que cargar en el ERP?</strong>
+      </p>
+      <p class="prose" style="margin-top:10px">
+        Esta herramienta se construyó en colaboración con IA — no como asistencia técnica,
+        sino como interlocutor para modelar la lógica. Cada iteración surgió de la interacción:
+        la IA implementaba, el negocio validaba, y cuando el resultado era técnicamente correcto
+        pero operativamente inútil, el problema se redefinía desde el principio.
+      </p>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Estructuración del problema</div>
+      <p class="prose">Lo que llegó como una pregunta única se separa en dos problemas con lógica distinta:</p>
+      <div class="items">
+        <div class="item"><div class="item-dot"></div><div><strong>Descriptivo:</strong> dado un precio publicado, ¿cuál es el margen real después de todos los costos?</div></div>
+        <div class="item"><div class="item-dot"></div><div><strong>Inverso:</strong> dado un margen objetivo, ¿qué porcentaje de ganancia hay que marcar en el ERP?</div></div>
+      </div>
+      <p class="prose" style="margin-top:14px">El requerimiento del negocio es resolver el segundo. Sin el primero, el segundo no tiene base.</p>
+    </div>
+
+    <div class="pivot-block reveal">
+      <div class="pivot-label">El momento de quiebre</div>
+      <div class="pivot-title">El modelo mostraba un número correcto. Yo sabía que no podía serlo.</div>
+      <p class="pivot-text">
+        El umbral de $33.000 en ML es público y conocido: por debajo, el envío lo paga el comprador;
+        por encima, es gratuito y obligatorio — y el costo lo absorbe el vendedor.
+        Cuando el cotizador devolvía un margen alto para productos que cruzaban ese umbral,
+        el número era matemáticamente correcto — pero conociendo cómo funcionan los envíos en la práctica,
+        ese margen no podía existir. <strong>La decisión fue ir a validarlo con datos reales</strong>
+        en lugar de aceptar el output del modelo. Eso requería analizar el historial de ventas
+        para entender cuánto costaban realmente los envíos y en qué proporción se distribuían
+        por modalidad. La IA no tenía forma de detectar ese problema — era conocimiento de negocio.
+      </p>
+    </div>
+
+    <div class="iterations reveal">
+      <div class="iterations-title">Iteraciones del proceso</div>
+
+      <div class="iter">
+        <div class="iter-num">IT 1</div>
+        <div class="iter-body">
+          <div class="iter-title">Cotizador base y solver iterativo</div>
+          <div class="iter-desc">El cargo fijo por tramo es circular: depende del precio, y el precio depende del porcentaje que se está calculando. Una ecuación directa produce un resultado incorrecto porque cruzar un tramo cambia el cargo fijo y por lo tanto el margen. <strong>Solución: algoritmo de bisección</strong> que converge al porcentaje correcto considerando el tramo real en que termina cayendo el precio.</div>
+          <div class="iter-decision">Solver por bisección implementado. Manejo ARS / USD / EUR con tipo de cambio configurable.</div>
+        </div>
+      </div>
+
+      <div class="iter pivot-iter">
+        <div class="iter-num">IT 2 ⚡</div>
+        <div class="iter-body">
+          <div class="iter-title">Validación con datos reales — el número no sobrevive al negocio</div>
+          <div class="iter-desc">Al superar $33.000, el cargo fijo desaparece y el margen base sube — pero ese margen no considera el costo de envío que ahora absorbe el vendedor. Para validar cuánto costaban realmente esos envíos, analicé 6 meses de ventas reales: costos por modalidad, distribución del mix, rangos de variación. <strong>El desglose confirmó que el modelo estaba ocultando un costo que en muchos casos superaba el margen que se intentaba proteger.</strong> Se incorporan las tres modalidades reales — Flex, Colecta y Acuerdo directo — calibradas con esos datos.</div>
+          <div class="iter-decision">Desglose por modalidad incorporado, calibrado con historial real de ventas.</div>
+        </div>
+      </div>
+
+      <div class="iter">
+        <div class="iter-num">IT 3</div>
+        <div class="iter-body">
+          <div class="iter-title">¿En cuántas ventas realmente se alcanza el target?</div>
+          <div class="iter-desc">Con el mix real conocido, analicé qué porcentaje de transacciones alcanzaba el objetivo de margen según el target elegido. Apuntar al target original dejaba el margen promedio ponderado por debajo del objetivo en la mayoría de los casos — porque Colecta, la modalidad más frecuente, tiene un costo que lo erosiona sistemáticamente. <strong>El nuevo target no es arbitrario: es el punto donde el margen ponderado real coincide con el objetivo de negocio.</strong></div>
+          <div class="iter-decision">Target original queda como piso mínimo. Nuevo target adoptado como referencia deseable, respaldado por el análisis de cobertura.</div>
+        </div>
+      </div>
+
+      <div class="iter pivot-iter">
+        <div class="iter-num">IT 4 ⚡</div>
+        <div class="iter-body">
+          <div class="iter-title">El target correcto genera el problema que intenta resolver</div>
+          <div class="iter-desc">Al calcular el porcentaje para el nuevo target, el listing cruza $33.000 — activando el envío gratuito obligatorio que baja el margen real por debajo del target buscado. El modelo resuelve bien la ecuación que se le plantea. El problema es que la ecuación está mal planteada. <strong>No alcanza con mostrar el desglose: el solver en sí tiene que cambiar.</strong> Para listings que superan el umbral, el modelo resuelve el porcentaje para que el margen ponderado real — no el base — llegue al target.</div>
+          <div class="iter-decision">Solver ponderado real implementado. Los targets son ahora accionables.</div>
+        </div>
+      </div>
+
+      <div class="iter">
+        <div class="iter-num">IT 5</div>
+        <div class="iter-body">
+          <div class="iter-title">Moneda extranjera y publicidad paga</div>
+          <div class="iter-desc">Muchos costos del ERP están en USD o EUR. Se implementa conversión en tiempo real con tipo de cambio configurable. Se agrega toggle de publicidad paga — presente en el 15% de las ventas del período analizado — que cuando está activo impacta en todos los cálculos: margen actual, targets y desglose.</div>
+          <div class="iter-decision">Cotizador cubre todas las variables operativas relevantes.</div>
+        </div>
+      </div>
+
+      <div class="iter">
+        <div class="iter-num">IT 6</div>
+        <div class="iter-body">
+          <div class="iter-title">Validación contra 4.250 ventas reales</div>
+          <div class="iter-desc">Se corre un backtest sobre 4.250 ventas individuales comparando lo que el cotizador predice vs. lo que ML efectivamente cobró. Los cargos fijos tienen más del 99% de precisión. La validación también revela que el default de comisión estaba levemente subestimado respecto al valor real más frecuente.</div>
+          <div class="iter-decision">Cotizador validado como confiable. Único ajuste: comisión default corregida al valor real más frecuente.</div>
+        </div>
+      </div>
+
+      <div class="iter">
+        <div class="iter-num">IT 7</div>
+        <div class="iter-body">
+          <div class="iter-title">Adaptación responsive para mobile</div>
+          <div class="iter-desc">Las grillas de 3 y 4 columnas quedan comprimidas e ilegibles en pantallas pequeñas. Se implementa layout colapsable vía CSS puro sin modificar la lógica de cálculo.</div>
+          <div class="iter-decision">Compatible con mobile y desktop sin cambios en el modelo.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="result-box reveal">
+      <div class="result-label">Entregable</div>
+      <div class="result-title">Herramienta interactiva de cotización de rentabilidad</div>
+      <div class="result-items">
+        <div class="result-item"><div class="result-item-dot"></div><div>Ingresás costo, porcentaje actual, comisión y moneda (ARS / USD / EUR)</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Devuelve margen real desglosado por modalidad de envío</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Calcula el porcentaje necesario para cualquier target de margen</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Cuando el precio cruza $33.000, resuelve sobre margen ponderado real — no margen base</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Toggle de publicidad paga con impacto en todos los cálculos</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Validado contra 4.250 ventas reales · 99%+ de precisión en cargos fijos</div></div>
+      </div>
+    </div>
+
+  </article>
+
+  <div class="divider reveal"></div>
+
+  <!-- ══════════════════════════════════════
+       CASO 02 · CLIENTES
+  ══════════════════════════════════════ -->
+  <article class="case">
+
+    <div class="reveal">
+      <div class="case-eyebrow">02 · Segmentación de cartera de clientes</div>
+      <h2 class="case-title">Datos sin forma,<br>decisión sin criterio.</h2>
+      <p class="case-sub">Un reporte de ventas ordenado por monto. La pregunta: ¿con quién hablamos primero?</p>
+      <div class="tags">
+        <span class="tag">KPI design</span>
+        <span class="tag">Análisis de Pareto</span>
+        <span class="tag">Segmentación</span>
+        <span class="tag">Decisión accionable</span>
+        <span class="tag">Excel</span>
+      </div>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Contexto</div>
+      <p class="prose">
+        El ERP genera un reporte llamado "ranking de clientes": una lista ordenada por monto
+        de compra para un período dado. El dato es correcto — el problema es que
+        un monto sin contexto temporal no dice nada accionable. No distingue al cliente
+        que compra todos los trimestres del que hizo una compra grande y desapareció.
+      </p>
+      <p class="prose" style="margin-top:10px">
+        El área comercial necesitaba tomar decisiones sobre su cartera pero no tenía claridad
+        sobre qué analizar ni qué construir para hacerlo. El punto de partida fue definir eso.
+      </p>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Objetivo — definido antes de tocar los datos</div>
+      <p class="prose">
+        El objetivo no era un análisis — era un artefacto con salida accionable:
+        una guía que le diga al área comercial con quién hablar primero y por qué.
+        Para eso, la pregunta relevante no es <strong>¿quién compró más?</strong>
+        sino <strong>¿con quién tengo una relación sólida, y con quién no?</strong>
+      </p>
+      <p class="prose" style="margin-top:10px">
+        Eso requería construir dos KPIs que no existían en ningún reporte del ERP.
+      </p>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">KPIs definidos</div>
+      <table class="kpi-table">
+        <thead>
+          <tr>
+            <th>KPI</th>
+            <th>Definición</th>
+            <th>Qué mide</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Índice de consistencia temporal</td>
+            <td>Presencia del cliente en los Paretos trimestrales · escala 0–4</td>
+            <td>Regularidad de la relación comercial a lo largo del año</td>
+          </tr>
+          <tr>
+            <td>Actividad reciente</td>
+            <td>Si el cliente aparece en el último trimestre analizado · binario</td>
+            <td>Estado actual de la relación — si sigue activo o desapareció</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="prose" style="margin-top:12px">
+        La combinación de ambos define la categoría y la acción. Volumen de compra —
+        el único dato que entrega el ERP — no es suficiente por sí solo: un cliente puede
+        tener alto volumen anual con baja consistencia, o bajo volumen con presencia constante.
+      </p>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Metodología</div>
+      <p class="prose">
+        Con ~2.300 clientes activos y ventas distribuidas de forma muy desigual,
+        el primer problema era de criterio: ¿cómo separar lo relevante de lo que no lo es?
+        Había varias formas de ordenar el mismo dato — por volumen acumulado,
+        por frecuencia, por ticket promedio.
+      </p>
+      <p class="prose" style="margin-top:10px">
+        La decisión fue usar análisis de Pareto trimestral porque permite identificar
+        qué clientes sostienen el volumen del negocio en cada período — el grupo reducido
+        que concentra el 80% de la facturación. Aplicarlo por trimestre, y no sobre el año completo,
+        agrega la dimensión temporal: no solo quién sostiene el volumen,
+        sino si lo hace de forma consistente o fue un pico puntual.
+      </p>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Categorías y acción sugerida</div>
+      <table class="cat-table">
+        <thead>
+          <tr>
+            <th>Presencia trimestral</th>
+            <th>Q4 incluido</th>
+            <th>Categoría</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="top-row">
+            <td>4 trimestres</td>
+            <td>Sí</td>
+            <td>Fidelizado pleno</td>
+            <td>Seguimiento especial — no interrumpir la relación</td>
+          </tr>
+          <tr>
+            <td>3 trimestres</td>
+            <td>Sí</td>
+            <td>Fidelizado activo</td>
+            <td>Mantener — relación sólida y vigente</td>
+          </tr>
+          <tr>
+            <td>3 trimestres</td>
+            <td>No</td>
+            <td>Fidelizado en riesgo</td>
+            <td>Contacto inmediato — desapareció en el último período</td>
+          </tr>
+          <tr>
+            <td>2 trimestres</td>
+            <td>Sí</td>
+            <td>Recurrente reciente</td>
+            <td>Consolidar — patrón positivo, confirmar continuidad</td>
+          </tr>
+          <tr>
+            <td>2 trimestres</td>
+            <td>No</td>
+            <td>Recurrente</td>
+            <td>Monitorear — compra con regularidad pero sin actividad reciente</td>
+          </tr>
+          <tr>
+            <td>1 trimestre</td>
+            <td>Sí</td>
+            <td>Nuevo / reactivado</td>
+            <td>Evaluar potencial — primera aparición o reaparición reciente</td>
+          </tr>
+          <tr>
+            <td>1 trimestre</td>
+            <td>No</td>
+            <td>Ocasional</td>
+            <td>Baja prioridad — evaluar si justifica esfuerzo comercial</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Hallazgo operativo</div>
+      <p class="prose">
+        El 20–26% de los clientes activos concentra el 80% de la facturación en cada trimestre.
+        Pero ese grupo rota: no son siempre los mismos clientes en cada período.
+        Enfocar el esfuerzo comercial solo en el ranking anual oculta esa rotación
+        y hace perder de vista tanto a los clientes en riesgo como a los que están creciendo.
+      </p>
+      <p class="prose" style="margin-top:10px">
+        La segmentación por consistencia temporal convierte el ranking en una herramienta
+        de decisión: no solo dice quiénes son los mejores clientes,
+        sino <strong>qué hacer con cada uno.</strong>
+      </p>
+    </div>
+
+    <div class="result-box reveal">
+      <div class="result-label">Entregable</div>
+      <div class="result-title">Matriz de segmentación de cartera de clientes</div>
+      <div class="result-items">
+        <div class="result-item"><div class="result-item-dot"></div><div>Categoría y acción definida para cada cliente activo de la cartera</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Basada en análisis de Pareto trimestral sobre ~2.300 clientes activos</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Dos KPIs construidos desde el dato crudo: consistencia temporal y actividad reciente</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Construida íntegramente en Excel · IA utilizada solo para validar criterios conceptuales</div></div>
+      </div>
+    </div>
+
+    <a href="analisis_clientes.pdf" class="pdf-link reveal" target="_blank">
+      Ver documento completo →
+    </a>
+
+  </article>
+
+  <footer class="reveal">
+    <div>
+      <div class="footer-name">Joaquín Marchione</div>
+      <div class="footer-meta">
+        Analista Funcional de Sistemas<br>
+        joaquinmarchione@gmail.com · +54 9 11 2155-8001
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="https://linkedin.com/in/joakomi" target="_blank">LinkedIn</a>
+      <a href="https://github.com/joakoMI" target="_blank">GitHub</a>
+      <a href="https://behance.net/joaquinmarchio" target="_blank">Behance</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.07 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
