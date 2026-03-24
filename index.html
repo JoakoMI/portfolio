@@ -35,7 +35,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -298,20 +298,11 @@ footer { border-top: 1px solid var(--border); padding: 36px 0 56px; display: fle
     <div class="iterations reveal">
       <div class="iterations-title">Iteraciones del proceso</div>
 
-      <div class="iter">
-        <div class="iter-num">IT 1</div>
-        <div class="iter-body">
-          <div class="iter-title">Cotizador base y solver iterativo</div>
-          <div class="iter-desc">El cargo fijo por tramo es circular: depende del precio, y el precio depende del porcentaje que se está calculando. Una ecuación directa produce un resultado incorrecto porque cruzar un tramo cambia el cargo fijo y por lo tanto el margen. <strong>Solución: algoritmo de bisección</strong> que converge al porcentaje correcto considerando el tramo real en que termina cayendo el precio.</div>
-          <div class="iter-decision">Solver por bisección implementado. Manejo ARS / USD / EUR con tipo de cambio configurable.</div>
-        </div>
-      </div>
-
       <div class="iter pivot-iter">
         <div class="iter-num">IT 2 ⚡</div>
         <div class="iter-body">
           <div class="iter-title">Validación con datos reales — el número no sobrevive al negocio</div>
-          <div class="iter-desc">Al superar $33.000, el cargo fijo desaparece y el margen base sube — pero ese margen no considera el costo de envío que ahora absorbe el vendedor. Para validar cuánto costaban realmente esos envíos, analicé 6 meses de ventas reales: costos por modalidad, distribución del mix, rangos de variación. <strong>El desglose confirmó que el modelo estaba ocultando un costo que en muchos casos superaba el margen que se intentaba proteger.</strong> Se incorporan las tres modalidades reales — Flex, Colecta y Acuerdo directo — calibradas con esos datos.</div>
+          <div class="iter-desc">Al superar $33.000 el cargo fijo desaparece y el margen base sube — pero ese margen no incluye el costo de envío que ahora absorbe el vendedor. Para validar, analicé 6 meses de ventas reales por modalidad. <strong>El desglose confirmó que el modelo ocultaba un costo que en muchos casos superaba el margen que se intentaba proteger.</strong> Se incorporan las tres modalidades — Flex, Colecta y Acuerdo — calibradas con esos datos.</div>
           <div class="iter-decision">Desglose por modalidad incorporado, calibrado con historial real de ventas.</div>
         </div>
       </div>
@@ -320,8 +311,8 @@ footer { border-top: 1px solid var(--border); padding: 36px 0 56px; display: fle
         <div class="iter-num">IT 3</div>
         <div class="iter-body">
           <div class="iter-title">¿En cuántas ventas realmente se alcanza el target?</div>
-          <div class="iter-desc">Con el mix real conocido, analicé qué porcentaje de transacciones alcanzaba el objetivo de margen según el target elegido. Apuntar al target original dejaba el margen promedio ponderado por debajo del objetivo en la mayoría de los casos — porque Colecta, la modalidad más frecuente, tiene un costo que lo erosiona sistemáticamente. <strong>El nuevo target no es arbitrario: es el punto donde el margen ponderado real coincide con el objetivo de negocio.</strong></div>
-          <div class="iter-decision">Target original queda como piso mínimo. Nuevo target adoptado como referencia deseable, respaldado por el análisis de cobertura.</div>
+          <div class="iter-desc">Con el mix real, analicé qué porcentaje de transacciones alcanzaba el objetivo según el target elegido. El target original dejaba el margen ponderado por debajo del objetivo en la mayoría de los casos. <strong>El nuevo target es el punto donde el margen ponderado real coincide con el objetivo de negocio.</strong></div>
+          <div class="iter-decision">Nuevo target adoptado como referencia deseable, respaldado por el análisis de cobertura.</div>
         </div>
       </div>
 
@@ -329,35 +320,17 @@ footer { border-top: 1px solid var(--border); padding: 36px 0 56px; display: fle
         <div class="iter-num">IT 4 ⚡</div>
         <div class="iter-body">
           <div class="iter-title">El target correcto genera el problema que intenta resolver</div>
-          <div class="iter-desc">Al calcular el porcentaje para el nuevo target, el listing cruza $33.000 — activando el envío gratuito obligatorio que baja el margen real por debajo del target buscado. El modelo resuelve bien la ecuación que se le plantea. El problema es que la ecuación está mal planteada. <strong>No alcanza con mostrar el desglose: el solver en sí tiene que cambiar.</strong> Para listings que superan el umbral, el modelo resuelve el porcentaje para que el margen ponderado real — no el base — llegue al target.</div>
+          <div class="iter-desc">Al calcular el porcentaje para el nuevo target, el precio cruza $33.000 — activando el envío obligatorio que baja el margen real por debajo del target buscado. El modelo resuelve bien la ecuación que se le plantea. <strong>El problema es que la ecuación está mal planteada.</strong> El solver cambia: para precios que superan el umbral, resuelve para que el margen ponderado real llegue al target.</div>
           <div class="iter-decision">Solver ponderado real implementado. Los targets son ahora accionables.</div>
         </div>
       </div>
 
       <div class="iter">
-        <div class="iter-num">IT 5</div>
+        <div class="iter-num">IT 5–7</div>
         <div class="iter-body">
-          <div class="iter-title">Moneda extranjera y publicidad paga</div>
-          <div class="iter-desc">Muchos costos del ERP están en USD o EUR. Se implementa conversión en tiempo real con tipo de cambio configurable. Se agrega toggle de publicidad paga — presente en el 15% de las ventas del período analizado — que cuando está activo impacta en todos los cálculos: margen actual, targets y desglose.</div>
-          <div class="iter-decision">Cotizador cubre todas las variables operativas relevantes.</div>
-        </div>
-      </div>
-
-      <div class="iter">
-        <div class="iter-num">IT 6</div>
-        <div class="iter-body">
-          <div class="iter-title">Validación contra 4.250 ventas reales</div>
-          <div class="iter-desc">Se corre un backtest sobre 4.250 ventas individuales comparando lo que el cotizador predice vs. lo que ML efectivamente cobró. Los cargos fijos tienen más del 99% de precisión. La validación también revela que el default de comisión estaba levemente subestimado respecto al valor real más frecuente.</div>
-          <div class="iter-decision">Cotizador validado como confiable. Único ajuste: comisión default corregida al valor real más frecuente.</div>
-        </div>
-      </div>
-
-      <div class="iter">
-        <div class="iter-num">IT 7</div>
-        <div class="iter-body">
-          <div class="iter-title">Adaptación responsive para mobile</div>
-          <div class="iter-desc">Las grillas de 3 y 4 columnas quedan comprimidas e ilegibles en pantallas pequeñas. Se implementa layout colapsable vía CSS puro sin modificar la lógica de cálculo.</div>
-          <div class="iter-decision">Compatible con mobile y desktop sin cambios en el modelo.</div>
+          <div class="iter-title">Variables operativas · validación · responsive</div>
+          <div class="iter-desc">Conversión de moneda en tiempo real (ARS / USD / EUR) · toggle de publicidad paga · backtest contra 4.250 ventas reales con 99%+ de precisión en cargos fijos · adaptación mobile.</div>
+          <div class="iter-decision">Cotizador validado y operativo en todas las variables relevantes.</div>
         </div>
       </div>
 
@@ -375,6 +348,10 @@ footer { border-top: 1px solid var(--border); padding: 36px 0 56px; display: fle
         <div class="result-item"><div class="result-item-dot"></div><div>Validado contra 4.250 ventas reales · 99%+ de precisión en cargos fijos</div></div>
       </div>
     </div>
+
+    <a href="cotizador-demo.html" class="pdf-link reveal" target="_blank" style="margin-top:12px;">
+      Ver demo interactiva →
+    </a>
 
   </article>
 
@@ -559,6 +536,91 @@ footer { border-top: 1px solid var(--border); padding: 36px 0 56px; display: fle
     <a href="analisis_clientes.pdf" class="pdf-link reveal" target="_blank">
       Ver documento completo →
     </a>
+
+  </article>
+
+  <div class="divider reveal"></div>
+
+  <!-- ══════════════════════════════════════
+       CASO 03 · SEGUIMIENTO DE COTIZACIONES
+  ══════════════════════════════════════ -->
+  <article class="case">
+
+    <div class="reveal">
+      <div class="case-eyebrow">03 · Seguimiento de cotizaciones</div>
+      <h2 class="case-title">Si el ERP no lo hace,<br>lo construís por afuera.</h2>
+      <p class="case-sub">Una capa de seguimiento sobre un sistema que no la tiene.</p>
+      <div class="tags">
+        <span class="tag">Diseño de solución</span>
+        <span class="tag">Apps Script</span>
+        <span class="tag">Limitación de sistema</span>
+        <span class="tag">Roles y estados</span>
+        <span class="tag">Construido con IA</span>
+      </div>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Situación</div>
+      <p class="prose">
+        El ERP registra cotizaciones pero no permite hacer nada con esa información.
+        No tiene estados, no tiene notas editables, y el único filtro disponible es por fecha.
+        El proveedor no va a implementar el cambio.
+      </p>
+      <p class="prose" style="margin-top:10px">
+        El requerimiento: ver cotizaciones por vendedor, cambiarles el estado,
+        agregar notas, y que el supervisor tenga una vista consolidada para tomar acciones comerciales.
+        Las cotizaciones que ya pasaron a pedido en el ERP deben quedar excluidas automáticamente.
+      </p>
+    </div>
+
+    <div class="block reveal">
+      <div class="block-label">Solución</div>
+      <p class="prose">
+        App web sobre Google Apps Script con Google Sheets como base de datos.
+        El supervisor exporta el Excel semanal del ERP e importa a la app —
+        las cotizaciones con campo "procesado" activo se excluyen del seguimiento.
+        Cada vendedor gestiona sus cotizaciones desde el navegador.
+      </p>
+      <div class="items" style="margin-top:12px">
+        <div class="item"><div class="item-dot"></div><div>Dos roles: vendedor ve solo sus cotizaciones · supervisor ve todo el equipo</div></div>
+        <div class="item"><div class="item-dot"></div><div>Estados editables — pendiente, aceptada, postergada, rechazada</div></div>
+        <div class="item"><div class="item-dot"></div><div>Notas inline por cotización · filtro por fecha</div></div>
+        <div class="item"><div class="item-dot"></div><div>Asignación de vendedor via campo "observaciones" del ERP — único campo editable disponible</div></div>
+      </div>
+    </div>
+
+    <div class="iterations reveal">
+      <div class="iterations-title">Iteraciones del proceso</div>
+
+      <div class="iter">
+        <div class="iter-num">V 1–2</div>
+        <div class="iter-body">
+          <div class="iter-title">El importador fallaba silenciosamente</div>
+          <div class="iter-desc">La primera versión tenía tabla por vendedor y upload de Excel. El importador no procesaba los archivos correctamente. Se reemplaza el mecanismo de carga por librería UMD con lectura via FileReader.</div>
+          <div class="iter-decision">Importador estabilizado. Merge por código de cotización con conteo de nuevas vs. actualizadas.</div>
+        </div>
+      </div>
+
+      <div class="iter pivot-iter">
+        <div class="iter-num">V 5→6 ⚡</div>
+        <div class="iter-body">
+          <div class="iter-title">La app funcionaba. No sincronizaba.</div>
+          <div class="iter-desc">La v5 era un HTML standalone distribuible por mail. Los datos vivían en localStorage — local al navegador de cada computadora. <strong>Cada vendedor veía su propia versión de los datos.</strong> Se rediseña la arquitectura completa: Apps Script sirve la página, Google Sheets es la base de datos, sincronización real entre todos los usuarios via URL del Web App.</div>
+          <div class="iter-decision">Arquitectura migrada a Apps Script + Sheets. Un solo punto de acceso para todo el equipo.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="result-box reveal">
+      <div class="result-label">Entregable</div>
+      <div class="result-title">App web de seguimiento de cotizaciones</div>
+      <div class="result-items">
+        <div class="result-item"><div class="result-item-dot"></div><div>Google Apps Script · Google Sheets como base de datos</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>Dos roles diferenciados · exclusión automática de cotizaciones procesadas</div></div>
+        <div class="result-item"><div class="result-item-dot"></div><div>En uso por el equipo comercial · construida en colaboración con IA</div></div>
+      </div>
+    </div>
 
   </article>
 
